@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avelir — Character Creation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg: #faf6ef;
+  --bg-warm: #f3ece0;
+  --surface: #ffffff;
+  --surface-2: #f8f3ea;
+  --border: #e0d5c0;
+  --border-dark: #c8b896;
+  --gold: #b8860b;
+  --gold-light: #d4a017;
+  --gold-pale: #f5e6c0;
+  --red: #8b1a1a;
+  --text: #2a1f12;
+  --text-mid: #5a4a30;
+  --text-muted: #8a7a5a;
+  --white: #ffffff;
+  --radius-sm: 6px;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 2px 8px rgba(42,31,18,0.08);
+  --shadow: 0 4px 20px rgba(42,31,18,0.12);
+  --shadow-lg: 0 12px 40px rgba(42,31,18,0.16);
+  --transition: 0.2s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  background: #faf6ef !important;
+  color-scheme: light !important;
+}
+
+body {
+  background: #faf6ef !important;
+  color: #2a1f12 !important;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  min-height: 100vh;
+  color-scheme: light !important;
+}
+
+/* Force all elements to respect light theme */
+*, *::before, *::after {
+  color-scheme: light;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; animation: fadeIn 0.3s ease; }
+.screen.active { display: block; background: #faf6ef !important; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes glow { 0%,100% { box-shadow: 0 0 20px rgba(184,134,11,0.2); } 50% { box-shadow: 0 0 40px rgba(184,134,11,0.4); } }
+@keyframes featReveal { from { opacity: 0; max-height: 0; transform: translateY(-8px); } to { opacity: 1; max-height: 200px; transform: none; } }
+@keyframes celebrate { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+
+/* ── BREADCRUMB ── */
+.breadcrumb {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.breadcrumb-step {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--text-mid);
+  cursor: pointer;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  transition: all var(--transition);
+  text-transform: uppercase;
+}
+
+.breadcrumb-step.active { background: var(--gold); color: #ffffff; }
+.breadcrumb-step.done { color: var(--text); }
+.breadcrumb-step.done:hover { color: var(--gold); }
+.breadcrumb-sep { color: var(--text-mid); font-size: 0.7rem; }
+
+/* ── HEADER ── */
+.site-header {
+  text-align: center;
+  padding: 3rem 1rem 2rem;
+  background: linear-gradient(180deg, var(--bg-warm) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.site-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 300px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.site-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.8rem, 8vw, 5rem);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+.site-title span { color: var(--gold); }
+
+.site-subtitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-mid);
+  letter-spacing: 0.4em;
+  margin-top: 0.6rem;
+  text-transform: uppercase;
+}
+
+/* ── BACK BUTTON ── */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: 1px solid var(--border-dark);
+  color: var(--text-mid);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all var(--transition);
+  margin: 1.2rem 0 0 1.5rem;
+}
+
+.back-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1.8rem;
+  cursor: pointer;
+  border-radius: 30px;
+  transition: all var(--transition);
+  text-transform: uppercase;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: var(--shadow); }
+.btn-primary:disabled { background: #d4c49a; color: #6a5a3a; transform: none; box-shadow: none; cursor: not-allowed; }
+
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border-dark);
+  color: var(--text-mid);
+}
+.btn-secondary:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+
+/* ── SCREEN 1: BULLETIN BOARD ── */
+.bulletin-intro {
+  max-width: 640px;
+  margin: 2rem auto 0.5rem;
+  padding: 0 1.5rem;
+  text-align: center;
+  color: var(--text-mid);
+  font-size: 1rem;
+  font-style: italic;
+}
+
+.bulletin-board {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 1.2rem;
+}
+
+.faction-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.6rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.faction-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--faction-color, var(--gold));
+  border-radius: 0 0 var(--radius) var(--radius);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  transform-origin: left;
+}
+
+.faction-card:hover {
+  border-color: var(--faction-color, var(--gold));
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.faction-card:hover::after { transform: scaleX(1); }
+
+.card-icon {
+  font-size: 2rem;
+  margin-bottom: 0.8rem;
+  display: block;
+}
+
+.card-faction-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.2rem;
+  line-height: 1.2;
+}
+
+.card-faction-sub {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-mid);
+  margin-bottom: 1rem;
+  letter-spacing: 0.03em;
+}
+
+.card-declaration {
+  font-style: italic;
+  color: var(--text-mid);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  border-left: 2px solid var(--faction-color, var(--gold));
+  padding-left: 0.8rem;
+  margin-bottom: 1.2rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+}
+
+.card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faction-color, var(--gold));
+}
+
+/* ── SCREEN 2: NEWS ── */
+.page-container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.faction-page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.faction-page-icon { font-size: 2.5rem; flex-shrink: 0; }
+
+.faction-page-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 0.3rem;
+}
+
+.faction-page-sub {
+  font-size: 0.85rem;
+  color: var(--text-mid);
+  font-style: italic;
+}
+
+.news-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fde8e8;
+  color: var(--red);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 0.25rem 0.7rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+.news-text {
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: var(--text);
+}
+
+/* ── KEYWORD / TOOLTIP ── */
+.keyword {
+  font-weight: 700;
+  border-bottom: 2px dotted;
+  cursor: pointer;
+  position: relative;
+  transition: opacity var(--transition);
+}
+
+.keyword:hover { opacity: 0.8; }
+
+/* Mobile modal for keywords */
+.kw-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(42,31,18,0.4);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.kw-modal-overlay.open { display: flex; }
+
+.kw-modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.5rem;
+  max-width: 600px;
+  width: 100%;
+  animation: slideUp 0.3s ease;
+  border-top: 3px solid var(--gold);
+}
+
+.kw-modal-term {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 0.6rem;
+}
+
+.kw-modal-def {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-mid);
+  margin-bottom: 1rem;
+}
+
+.kw-modal-close {
+  width: 100%;
+  background: var(--bg-warm);
+  border: none;
+  color: var(--text-mid);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.7rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* ── SCREEN 3: DETAIL ── */
+.section-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.detail-section { margin-bottom: 2rem; }
+
+.history-text {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--text-mid);
+  margin-bottom: 0.8rem;
+}
+
+.govt-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.2rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-mid);
+}
+
+.figures-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.8rem;
+}
+
+.figure-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.figure-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  line-height: 1.3;
+}
+
+.figure-desc {
+  font-size: 0.85rem;
+  color: var(--text-mid);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.geo-text {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--text-mid);
+}
+
+/* ── SCREEN 4: QUESTION ── */
+.identity-block {
+  background: var(--surface-2);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 2rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text-mid);
+}
+
+.question-display {
+  text-align: center;
+  margin: 1.5rem 0 2rem;
+  padding: 1.8rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.question-display h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.3rem, 3.5vw, 1.9rem);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.step-hint {
+  font-size: 0.8rem;
+  color: var(--text-mid);
+  margin-top: 0.6rem;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.option-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.option-card:hover {
+  border-color: var(--faction-color, var(--gold));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.option-card.selected {
+  border-color: var(--faction-color, var(--gold));
+  background: var(--gold-pale);
+  box-shadow: 0 0 0 3px rgba(184,134,11,0.15), var(--shadow);
+}
+
+.option-icon { font-size: 2rem; margin-bottom: 0.6rem; display: block; }
+
+.option-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.option-card.selected .option-title { color: var(--text); font-weight: 700; }
+
+.option-desc {
+  font-size: 0.9rem;
+  color: var(--text-mid);
+  font-style: italic;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+.feat-preview {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+  margin-top: 0;
+}
+
+.option-card.selected .feat-preview {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-dark);
+}
+
+.feat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #f5e6c0;
+  color: #6b4c00;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+
+.feat-name-sm {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+}
+
+.feat-desc-sm {
+  font-size: 0.85rem;
+  color: var(--text-mid);
+  line-height: 1.5;
+}
+
+/* ── SCREEN 5: RESULT ── */
+.result-outer {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+#result-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: celebrate 0.5s ease;
+  border: 1px solid var(--border);
+}
+
+.result-top {
+  padding: 2.5rem 2rem 1.5rem;
+  background: linear-gradient(135deg, var(--bg-warm) 0%, var(--surface) 100%);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.result-top::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--faction-result-color, var(--gold));
+}
+
+.result-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.result-icon { font-size: 3rem; margin-bottom: 0.5rem; display: block; }
+
+.result-faction {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 0.4rem;
+}
+
+.result-option-label {
+  font-style: italic;
+  color: var(--text-mid);
+  font-size: 1rem;
+}
+
+.result-body { padding: 1.8rem 2rem; }
+
+.result-feat-box {
+  background: var(--gold-pale);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1.5rem;
+  animation: glow 3s ease infinite;
+}
+
+.result-feat-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.result-feat-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.result-feat-desc {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-mid);
+}
+
+.result-identity {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--text-mid);
+  line-height: 1.8;
+  padding: 1rem 1.2rem;
+  border-left: 2px solid var(--border-dark);
+}
+
+/* ── SHARE ── */
+.share-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.share-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-warm);
+  border: 1px solid var(--border-dark);
+  color: var(--text-mid);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all var(--transition);
+}
+
+.share-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+.share-btn.success { border-color: #2e7d32; color: #2e7d32; background: #e8f5e9; }
+
+.action-row {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+/* ── TOOLTIP DESKTOP ── */
+@media (min-width: 768px) {
+  .keyword { position: relative; }
+  .keyword .kw-tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border-dark);
+    font-size: 0.85rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.5;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius-sm);
+    width: 260px;
+    text-align: left;
+    pointer-events: none;
+    z-index: 100;
+    box-shadow: var(--shadow-lg);
+  }
+  .keyword .kw-tip::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--border-dark);
+  }
+  .keyword:hover .kw-tip { display: block; }
+}
+
+/* ── ORNAMENT ── */
+.ornament {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+  letter-spacing: 1em;
+  margin: 2rem 0;
+  opacity: 0.6;
+}
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-dark);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.7rem 1.5rem;
+  border-radius: 30px;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
+}
+
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .bulletin-board, .options-grid, .figures-grid { grid-template-columns: 1fr; }
+  .share-buttons, .action-row { flex-direction: column; }
+  .btn, .share-btn { width: 100%; justify-content: center; }
+  .result-top, .result-body { padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- KEYWORD MODAL (mobile) -->
+<div class="kw-modal-overlay" id="kw-overlay" onclick="closeKwModal(event)">
+  <div class="kw-modal">
+    <div class="kw-modal-term" id="kw-term"></div>
+    <div class="kw-modal-def" id="kw-def"></div>
+    <button class="kw-modal-close" onclick="document.getElementById('kw-overlay').classList.remove('open')">Cerrar</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SCREEN 1: BULLETIN BOARD -->
+<!-- ════════════════════════════════════════════ -->
+<div class="screen active" id="screen-1">
+  <header class="site-header">
+    <div class="site-title">A<span>V</span>ELIR</div>
+    <div class="site-subtitle">Character Creation</div>
+  </header>
+  <p class="bulletin-intro">El mundo está en movimiento. Seis fuerzas definen Avelir — ninguna completamente buena, ninguna completamente malvada. Elige la tuya.</p>
+  <div class="bulletin-board" id="bulletin-board"></div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SCREEN 2: NEWS -->
+<!-- ════════════════════════════════════════════ -->
+<div class="screen" id="screen-2">
+  <div class="breadcrumb" id="bc-2">
+    <span class="breadcrumb-step done" onclick="goTo(1)">Facciones</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step active">Noticias</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step">Detalle</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step">Pregunta</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step">Resultado</span>
+  </div>
+  <header class="site-header" style="padding:1.5rem 1rem">
+    <div class="site-title" style="font-size:clamp(1.8rem,5vw,3rem)">A<span>V</span>ELIR</div>
+  </header>
+  <button class="back-btn" onclick="goTo(1)">← Volver al tablón</button>
+  <div class="page-container">
+    <div class="faction-page-header">
+      <div class="faction-page-icon" id="news-icon"></div>
+      <div>
+        <div class="faction-page-name" id="news-name"></div>
+        <div class="faction-page-sub" id="news-sub"></div>
+      </div>
+    </div>
+    <div class="news-label">⚡ Último aviso</div>
+    <div class="news-text" id="news-text"></div>
+    <div class="ornament">· · ·</div>
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="goTo(3)">Conocer más →</button>
+      <button class="btn btn-secondary" onclick="goTo(1)">Explorar otra facción</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SCREEN 3: FACTION DETAIL -->
+<!-- ════════════════════════════════════════════ -->
+<div class="screen" id="screen-3">
+  <div class="breadcrumb">
+    <span class="breadcrumb-step done" onclick="goTo(1)">Facciones</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step done" onclick="goTo(2)">Noticias</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step active">Detalle</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step">Pregunta</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step">Resultado</span>
+  </div>
+  <header class="site-header" style="padding:1.5rem 1rem">
+    <div class="site-title" style="font-size:clamp(1.8rem,5vw,3rem)">A<span>V</span>ELIR</div>
+  </header>
+  <button class="back-btn" onclick="goTo(2)">← Volver a noticias</button>
+  <div class="page-container">
+    <div class="faction-page-header">
+      <div class="faction-page-icon" id="detail-icon"></div>
+      <div>
+        <div class="faction-page-name" id="detail-name"></div>
+        <div class="faction-page-sub" id="detail-sub"></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="section-label">Historia</div>
+      <div id="detail-history"></div>
+    </div>
+    <div class="detail-section">
+      <div class="section-label">Tipo de Gobierno</div>
+      <div class="govt-box" id="detail-govt"></div>
+    </div>
+    <div class="detail-section">
+      <div class="section-label">Figuras Clave</div>
+      <div class="figures-grid" id="detail-figures"></div>
+    </div>
+    <div class="detail-section">
+      <div class="section-label">Situación Actual</div>
+      <p class="geo-text" id="detail-geo"></p>
+    </div>
+    <div class="ornament">· · ·</div>
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap">
+      <button class="btn btn-primary" id="choose-btn" onclick="goTo(4)">Elegir esta Facción →</button>
+      <button class="btn btn-secondary" onclick="goTo(1)">Explorar otra facción</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SCREEN 4: PHILOSOPHICAL QUESTION -->
+<!-- ════════════════════════════════════════════ -->
+<div class="screen" id="screen-4">
+  <div class="breadcrumb">
+    <span class="breadcrumb-step done" onclick="goTo(1)">Facciones</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step done" onclick="goTo(2)">Noticias</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step done" onclick="goTo(3)">Detalle</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step active">Pregunta</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step">Resultado</span>
+  </div>
+  <header class="site-header" style="padding:1.5rem 1rem">
+    <div class="site-title" style="font-size:clamp(1.8rem,5vw,3rem)">A<span>V</span>ELIR</div>
+  </header>
+  <button class="back-btn" onclick="goTo(3)">← Volver al detalle</button>
+  <div class="page-container">
+    <div class="identity-block" id="q-identity"></div>
+    <div class="question-display">
+      <h2 id="q-question"></h2>
+      <div class="step-hint">Selecciona una opción para ver tu feat</div>
+    </div>
+    <div class="options-grid" id="q-options"></div>
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap">
+      <button class="btn btn-primary" id="confirm-btn" onclick="goTo(5)" disabled>Ver mi resultado →</button>
+      <button class="btn btn-secondary" onclick="goTo(3)">Volver atrás</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SCREEN 5: RESULT -->
+<!-- ════════════════════════════════════════════ -->
+<div class="screen" id="screen-5">
+  <div class="breadcrumb">
+    <span class="breadcrumb-step done" onclick="goTo(1)">Facciones</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step done" onclick="goTo(2)">Noticias</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step done" onclick="goTo(3)">Detalle</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step done" onclick="goTo(4)">Pregunta</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step active">Resultado</span>
+  </div>
+  <header class="site-header" style="padding:1.5rem 1rem">
+    <div class="site-title" style="font-size:clamp(1.8rem,5vw,3rem)">A<span>V</span>ELIR</div>
+  </header>
+  <div class="result-outer">
+    <div id="result-card">
+      <div class="result-top">
+        <div class="result-tag">Tu Personaje</div>
+        <div class="result-icon" id="r-icon"></div>
+        <div class="result-faction" id="r-faction"></div>
+        <div class="result-option-label" id="r-option"></div>
+      </div>
+      <div class="result-body">
+        <div class="result-feat-box">
+          <div class="result-feat-label">⚜ Feat de Origen</div>
+          <div class="result-feat-name" id="r-feat-name"></div>
+          <div class="result-feat-desc" id="r-feat-desc"></div>
+        </div>
+        <div class="result-identity" id="r-identity"></div>
+      </div>
+    </div>
+
+    <div class="share-section">
+      <div class="share-title">Comparte tu elección</div>
+      <div class="share-buttons">
+        <button class="share-btn" onclick="captureScreenshot()">📸 Captura de pantalla</button>
+        <button class="share-btn" onclick="printResult()">🖨 Imprimir / PDF</button>
+        <button class="share-btn" id="copy-btn" onclick="copyText()">📋 Copiar texto</button>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="restartAll()">Crear otro personaje</button>
+      <button class="btn btn-secondary" onclick="goTo(1)">Explorar otras facciones</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// DATA
+// ═══════════════════════════════════
+const factions = [
+  {
+    id:"cheran", color:"#9b2020", icon:"🔥",
+    name:"Teocracia de Cherán", sub:"Los Engari — El Pueblo que Ara",
+    declaration:'"Nuestro dios es el único. Él proveerá. Los infieles serán purificados. El fuego de Engar se esparcirá ante el retumbar de nuestra caballería."',
+    news:[
+      {t:"El "},{kw:"Palan'Nur",def:"El Ungido — líder supremo de Cherán, ejecutor de la voluntad de Engar Ab'Calen."},{t:" agoniza entre rezos y conspiraciones. "},{kw:"An'Fahal",def:"El heredero de la cuarta generación. Su nombre significa 'el amanecer'. Rodeado de generales extraordinarios."},{t:" se prepara para tomar el trono. Los "},{kw:"Sar'Qaim",def:"Los jihadistas del Palan'Shar. Los que ejecutan en la oscuridad. La guerra sagrada es un mandato — no una opción."},{t:" marchan hacia el norte. El "},{kw:"Palan'Shar",def:"El Concilio sagrado de Cherán — donde conviven cuatro facciones filosóficas que definen el alma del imperio."},{t:" se mueve en las sombras."}
+    ],
+    history:["Los Engari nacieron en las estepas como mercenarios fanáticos que nadie tomaba en serio. Lo que los diferenciaba era su fe — una devoción total a Engar Ab'Calen, el dios que ara la tierra para que brote la vida.","Generación tras generación esa fe los forjó. El primer Palan'Nur unificó las tribus y absorbió el Imperio de las Estepas. El segundo lo convirtió en un verdadero imperio. El tercero lo llevó a su cúspide.","Hoy son la potencia más temida de Avelir — no por tener el ejército más grande, sino porque tienen algo más peligroso: la certeza absoluta de que están en lo correcto."],
+    govt:"Teocracia. El Palan'Nur ejecuta la voluntad divina. El Palan'Shar define qué es esa voluntad. Cuatro facciones internas compiten: los Amin (ortodoxos), los Palan'Umbar (gnósticos), los Amin'Kalam (iconoclastas) y los Sar'Qaim (jihadistas).",
+    figures:[{name:"Anan'Nur — El Tercer Palan'Nur",desc:"El Ungido que agoniza. Llevó a Cherán a su cúspide. Su muerte marcará una nueva era."},{name:"An'Fahal — El Cuarto Palan'Nur",desc:"El heredero. Rodeado de generales que cargan el peso que él aún no puede sostener."},{name:"Temürel — Abu'Amin",desc:"El Abuelo. General sin título formal. La memoria viva del imperio. Tiene un plan que nadie conoce completamente."},{name:"Los Sar'Qaim",desc:"Los que ejecutan en la oscuridad. La facción más radical. Marchan purificando todo a su paso."}],
+    geo:"Cherán está en su momento más poderoso — y más inestable. La transición al cuarto Palan'Nur está en marcha. Los Sar'Qaim avanzan ejecutando purgas que despiertan una resistencia que nadie calculó.",
+    identity:"Creciste en la única verdad que existe — la de Engar Ab'Calen. Tu familia ha servido al Palan'Nur desde que puedes recordar. La fe no es algo que elegiste — es lo que eres. Pero el mundo es más complicado de lo que los sermones describen. Y tú lo sabes.",
+    question:"¿Tu fe es tu fuerza o tu cadena?",
+    options:[
+      {icon:"⚔️",title:'"La fe es mi fuerza"',desc:"Crees con todo lo que tienes. Esa certeza te hace invencible cuando luchas por algo genuino.",featName:"Convicción de Engar",featDesc:"Cuando peleas en nombre de algo que crees genuinamente, una vez por encuentro puedes ignorar el daño de un golpe que te hubiera derribado."},
+      {icon:"🗣️",title:'"La fe es mi cadena"',desc:"Conoces el dogma mejor que nadie — y ves sus grietas. Puedes usar esa duda en otros.",featName:"La Grieta en la Fe",featDesc:"Una vez por sesión puedes reconocer la duda en otro creyente y usarla para persuadirlo completamente."},
+      {icon:"🔍",title:'"Yo elijo en qué creer"',desc:"Creciste cuestionando. Eso te costó — pero te dio un don que pocos tienen.",featName:"Ojo del Hereje",featDesc:"Tu capacidad de cuestionar el dogma te permite identificar manipulación, ilusiones o mentiras construidas sobre creencias falsas."}
+    ]
+  },
+  {
+    id:"vorin", color:"#1a4a7a", icon:"⚖️",
+    name:"Casa Vorin", sub:"El Gremio — La Voz, El Escudo, La Garra",
+    declaration:'"El comercio es poder. La información es poder. Nosotros tenemos ambos. Todo tiene precio — incluyendo tú."',
+    news:[
+      {kw:"El Gremio",def:"La junta suprema de Casa Vorin. Todos los Caëlens activos. Sus decisiones son por consenso. Nadie sabe cuántos son ni quiénes son."},{t:" acaba de mover una cantidad de oro que nadie puede rastrear. "},{kw:"Aldren, Voz de Casa Vorin",def:"El título que representa la cara diplomática. Las sonrisas que abren puertas."},{t:" fue visto en tres capitales en la misma semana. Se dice que "},{kw:"La Primera Garra",def:"El título más temido de Casa Vorin. El maestro de las sombras. Identidad absolutamente secreta."},{t:" está activa. Nadie sabe qué está comprando Casa Vorin. Todos deberían estar preocupados."}
+    ],
+    history:["Casa Vorin comenzó como un linaje élfico guerrero que estaba viniendo a menos. Fue Caëlen Vorin'el — el hijo menor — quien vio lo que nadie más podía: que el mundo no necesitaba otro ejército. Necesitaba a alguien que financiara los ejércitos de todos los demás.","Caëlen construyó la institución junto a sus hermanos: la diplomacia, la fuerza, las sombras, y él la estrategia que los unía. Hoy esos nombres son títulos hereditarios que se pasan mediante adopción e indoctrinación.","Entrar a Casa Vorin es el sueño de los más ambiciosos. Tu cara cambia. Tu nombre cambia. Tu historia desaparece. Caëlen no fundó solo una institución. Fundó una especie."],
+    govt:"Corporación hereditaria. Cuatro divisiones: Caëlen (estrategia, secreto), Aldren — Voz (diplomacia), Ilvaën — Escudo (fuerza), Maëlor — Garra (sombras, secreto). Por encima de todos, El Gremio decide por consenso.",
+    figures:[{name:"Caëlen Vorin'el",desc:"El fundador. El hijo menor que convirtió un linaje guerrero en corporación mercantil. Su nombre es ahora un título."},{name:"El Gremio",desc:"La junta suprema. Nadie sabe cuántos son. Sus decisiones son irreversibles."},{name:"Aldren — Voz de Casa Vorin",desc:"El rostro diplomático. Hay varios Aldrens en el mundo. Solo uno es La Primera Voz."},{name:"Maëlor — Garra de Casa Vorin",desc:"El maestro de las sombras. Identidad secreta. Secretos, inteligencia, vicios ajenos como moneda de cambio."}],
+    geo:"Casa Vorin invirtió en Aetharion antes de que nadie lo viera venir — y ganaron. Ahora tienen acceso privilegiado a la tecnología militar más avanzada de Avelir. El Gremio se mueve en todas las capitales simultáneamente. Casa Vorin nunca pierde.",
+    identity:"Nadie entra a Casa Vorin por accidente. Tú viste la oportunidad y la tomaste. Dejaste atrás tu nombre, tu historia, tu cara. A cambio obtuviste algo que muy pocos tienen — poder real. Pero el proceso no terminó. Nunca termina.",
+    question:"¿Qué estás dispuesto a sacrificar para obtener lo que quieres?",
+    options:[
+      {icon:"🗣️",title:'"Todo tiene precio, incluyendo yo"',desc:"Entendiste el juego completamente. Sabes exactamente qué ofrecer y cuándo.",featName:"El Precio Exacto",featDesc:"Una vez por sesión puedes ofrecer exactamente lo que alguien necesita escuchar para obtener su cooperación completa."},
+      {icon:"🔍",title:'"Hay cosas que no se venden"',desc:"Conoces el sistema desde adentro — y sabes cuándo alguien opera fuera de él.",featName:"Arquitectura del Poder",featDesc:"Tu conocimiento de cómo funciona el poder te permite identificar quién realmente manda en cualquier situación."},
+      {icon:"⚔️",title:'"El precio lo pagan otros"',desc:"Aprendiste a sobrevivir en el lugar más peligroso de Avelir — la corte de Casa Vorin.",featName:"Escudo Ajeno",featDesc:"Una vez por encuentro puedes usar a un aliado o enemigo como distracción sin consecuencias inmediatas para ti."}
+    ]
+  },
+  {
+    id:"orden", color:"#8b1a1a", icon:"🛡️",
+    name:"La Orden Escarlata", sub:"Los que Sangran por los Demás",
+    declaration:'"No servimos a ningún rey. No tenemos sede ni ejército. Solo un código y la voluntad de morir por él. Llegamos cuando nadie más llega."',
+    news:[
+      {t:"Una "},{kw:"hermandad",def:"Las células operativas de la Orden. 17-18 hermandades de 20-30 caballeros dispersas por todo Avelir."},{t:" entera fue destruida en una noche. Los sobrevivientes hablan de criaturas que no pertenecen a este mundo. Por tercera vez en 700 años alguien convoca "},{kw:"La Mesa Completa",def:"La coalición de todas las hermandades. Solo ha ocurrido dos veces antes. Cuando se convoca, el mundo sabe que algo sin precedente está ocurriendo."},{t:". El "},{kw:"Primero de la Mesa",def:"El líder de cada hermandad. No hay líder global — solo el Juramento Escarlata los une a todos."},{t:" de cada hermandad debe responder al llamado."}
+    ],
+    history:["La Orden Escarlata nació de un acto de desobediencia que fue simultáneamente el más fiel al código que la fundó. Ser Arthantos desafió a su institución para defender a un pueblo que nadie más defendería.","No son muchos. Veinte caballeros de la Orden valen por mil soldados comunes — son multiplicadores de fuerza. Llegan, organizan, entrenan y lideran. Cuando la batalla termina, se van.","El mundo los considera anacronismos. El mundo se equivoca."],
+    govt:"Descentralizado. 17-18 hermandades unidas solo por el Juramento Escarlata. Cada una tiene un Primero de la Mesa. No hay líder global. Tres corrientes: Los Tantos (defienden hasta morir), Los Platos (negocian) y Los Normales (evalúan).",
+    figures:[{name:"Ser Arthantos — El Fundador",desc:"El Galahad de Avelir. Su nombre se corrompió en el habla popular — de ahí vienen 'Los Tantos'."},{name:"Hemmal — Dios Patrono",desc:"La manifestación divina que se fusionó con Ser Arthantos. Los caballeros lo invocan en combate."},{name:"Ser Gianni du Mont",desc:"Primero de la Mesa, Los Normales. Defendió Tol Varen junto a Arminio El Dorado y partió sin despedirse."},{name:"El Sobreviviente",desc:"Alguien sobrevivió la destrucción de la hermandad. Está convocando La Mesa Completa. Nadie sabe qué vio esa noche."}],
+    geo:"La Orden se desvanece — el mundo político los dejó obsoletos. Pero en su momento más débil algo está rompiendo la realidad. Las hermandades están siendo convocadas. El Juramento Escarlata no deja opción.",
+    identity:"Elegiste el camino más difícil en un mundo que ya no lo valora. No tienes rey, hogar ni fortuna. Tienes un código. Y ese código te ha llevado a lugares donde nadie más llega.",
+    question:"¿Cuándo el mundo te pone frente a una causa imposible — defiendes hasta morir, negocias para salvar lo que puedas, o evalúas si la batalla vale la pena?",
+    options:[
+      {icon:"⚔️",title:'"Los Tantos: Defiendo hasta morir"',desc:"El Juramento no tiene excepciones. Punto.",featName:"El Último en Caer",featDesc:"Cuando estás protegiendo a alguien más vulnerable, no puedes ser derribado mientras esa persona siga en peligro."},
+      {icon:"🗣️",title:'"Los Platos: Negocio para salvar lo que puedo"',desc:"La paz tiene valor aunque venga de la negociación.",featName:"La Mesa entre Espadas",featDesc:"Una vez por sesión puedes proponer un trato en medio de un conflicto que ambas partes tienen que considerar seriamente."},
+      {icon:"🔍",title:'"Los Normales: Evalúo si vale la pena"',desc:"No toda batalla merece ser peleada. Saber cuál sí es el verdadero arte.",featName:"La Pregunta del Veterano",featDesc:"Antes de cualquier encuentro puedes hacer una pregunta al DM sobre la situación y recibirás una respuesta honesta."}
+    ]
+  },
+  {
+    id:"aetharion", color:"#1a5276", icon:"🦅",
+    name:"Aetharion", sub:"El Jardín Eterno — Los Aetheri",
+    declaration:'"Evolución. Táctica. Estrategia. Temple. Magia al servicio de la victoria. El Jardín Eterno no para de crecer."',
+    news:[
+      {t:"Las águilas de "},{kw:"Aetharion",def:"El Jardín Eterno. Imperio naciente fundado por Alendi Galathas. La fuerza militar más innovadora de Avelir."},{t:" acaban de humillar al Primer Imperio en "},{kw:"Tol Marin",def:"Fortaleza pre-Rompimiento del Velo. Escenario de la batalla más importante de la era actual."},{t:". Por primera vez en siglos alguien le ganó a "},{kw:"Urushan",def:"El Primer Imperio. El más antiguo de Avelir. Sus naves son artefactos de otra era."},{t:" en batalla abierta. El mundo no volverá a ser el mismo."}
+    ],
+    history:["Durante siglos las casas heráldicas de Aetharion vivieron fragmentadas y humilladas. Generaciones enteras crecieron con la deuda de una derrota que no cometieron. Hasta que Alendi Galathas vio que esa humillación podía convertirse en combustible.","Alendi unificó las casas no por conquista sino por legitimidad — era uno de ellos. Junto a Anariel construyó el ejército más innovador que Avelir ha visto.","No ganaron por número — ganaron porque mientras los demás peleaban igual que siempre, Aetharion reinventó completamente la guerra."],
+    govt:"República Militar. El Arkhon Galas lidera. Los Primarcas comandan las legiones. Los Cónsules representan a las casas. Heraldin Galas controla tecnología y alquimia bélica. La balanza siempre inclina hacia lo militar.",
+    figures:[{name:"Alendi Galathas — Arkhon Galas",desc:"El Cúmulo de Estrellas. A los 14 años huyó de la humillación de su familia. Vagó por el mundo hasta convertirse en el arquitecto del Jardín Eterno."},{name:"Anariel — Heraldin Galas",desc:"La Heraldo. Arquitecta de la ventaja tecnológica. Brillante para la magia. Nadie entiende de dónde viene su poder."},{name:"Los Primarcas",desc:"Los generales de Aetharion. Cada uno un genio en su dominio. Toman decisiones en campo sin esperar órdenes."},{name:"Los Galadrim",desc:"La guardia élite del Arkhon Galas. El entrenamiento más arduo del mundo. Viven y mueren por los ideales de Alendi."}],
+    geo:"Aetharion acaba de ganar su batalla más importante. Cherán los llama el nuevo demonio. Casa Vorin apostó por ellos antes que nadie. Urushan, herido en Tol Marin, no ha dicho su última palabra.",
+    identity:"Creciste en la humillación de generaciones. Viste cómo el Primer Imperio aplastaba a tu pueblo. Pero Alendi Galathas vio que esa humillación podía convertirse en el ejército más innovador del mundo. Eres Aetheri. Y el Jardín Eterno apenas comienza a crecer.",
+    question:"¿Eres leal al hombre o a la institución?",
+    options:[
+      {icon:"⚔️",title:'"Leal al hombre"',desc:"Tu lealtad es a las personas, no a las ideas. Cuando alguien merece tu lealtad — la tiene para siempre.",featName:"Vínculo de Batalla",featDesc:"Cuando peleas al lado de alguien a quien debes lealtad personal, ambos tienen ventaja en sus primeros ataques del encuentro."},
+      {icon:"🗣️",title:'"Leal a la institución"',desc:"El Jardín Eterno es más grande que cualquier individuo. Alendi lo construyó para que durara más que él.",featName:"El Peso del Águila",featDesc:"Una vez por sesión puedes invocar la autoridad de Aetharion para obtener recursos, información o paso libre en territorio neutral."},
+      {icon:"🔍",title:'"Leal a la victoria"',desc:"No importa el hombre ni la institución. Importa ganar.",featName:"Ojo del Primarca",featDesc:"Tu entrenamiento te permite identificar la debilidad táctica de cualquier estructura, fortaleza o formación enemiga antes de atacar."}
+    ]
+  },
+  {
+    id:"urushan", color:"#1e6b3a", icon:"⚓",
+    name:"Urushan", sub:"El Primer Imperio — La Tormenta del Mar",
+    declaration:'"El Primer Imperio. La flota más antigua. La tradición más profunda. Llevamos milenios aquí — y seguiremos cuando todos los demás hayan caído."',
+    news:[
+      {kw:"Alarion",def:"Antes Aldric Von Rostov — el almirante más prestigiado de su generación. Cambió su nombre. Sin apellido. Sin Von. Sin linaje."},{t:" abandonó su nombre, su apellido y su lealtad. Desde las ruinas de "},{kw:"Ashlan",def:"Isla pre-Rompimiento del Velo. Se dice que fue el trono del Emperador. Su significado se perdió en el tiempo."},{t:" convoca a "},{kw:"Los Peregrinos",def:"Los seguidores de Alarion. No son rebeldes — son devotos. Eso los hace imposibles de derrotar políticamente."},{t:". "},{kw:"La Tormenta del Mar",def:"Iridel Von Richter — la Emperatriz de Urushan. Brillante, maestra de la intriga. Sabe que el colapso es inevitable. Opera de todas formas."},{t:" prepara su respuesta."}
+    ],
+    history:["Urushan es el primer imperio de Avelir — nacido de las cenizas del cataclismo. Heredaron la flota más extraordinaria que existe — naves forjadas en otra era que nadie más puede navegar.","Milenios de historia los convirtieron en maestros de la intriga y la manipulación. Nadie mueve los hilos del poder con más elegancia. Nadie muere de vejez en su corte.","La dinastía Von Richter lleva cuatro generaciones en el poder. Hoy Iridel Von Richter heredó ese legado — junto con una guerra civil que ya comenzó."],
+    govt:"Matriarcado pragmático. Las mujeres gobiernan, los hombres guerrean. La Emperatriz lidera. Los Almirantes tienen peso político profundo. La capital se mueve con cada nueva dinastía — hoy es Artesh.",
+    figures:[{name:"Iridel Von Richter — La Tormenta del Mar",desc:"La Emperatriz. Brillante, maestra de la intriga. Sabe que el colapso es inevitable. Opera de todas formas."},{name:"Alarion",desc:"Antes Aldric Von Rostov. Tuvo una visión. Ahora lidera desde Ashlan lo que el mundo llama locura."},{name:"Davorel Von Kersig",desc:"El Almirante Leal. Amigo de Alarion. Frío, calculado. Comanda las fuerzas de Iridel contra su amigo sin una sola lágrima."},{name:"Los Soleados",desc:"Los creyentes del Emperador. En un imperio secular, creer te distingue. Su número crece con Alarion."}],
+    geo:"Urushan acaba de perder en Tol Marin — la primera derrota en siglos. Alarion convoca seguidores mientras Iridel intenta aplastarlo sin crear un mártir. Sus naves milenarias se deterioran. Nadie sabe cómo repararlas.",
+    identity:"Creciste en el lugar más sofisticado y peligroso de Avelir. Aprendiste que todo es teatro — que detrás de cada sonrisa hay un plan, detrás de cada alianza hay un precio. Eso te hizo brillante. Y también te hizo desconfiar de todo.",
+    question:"¿Crees en algo, o solo calculas?",
+    options:[
+      {icon:"🗣️",title:'"Solo calculo"',desc:"El sentimentalismo es una debilidad. Ves los motivos reales detrás de las palabras.",featName:"La Lectura del Poder",featDesc:"Una vez por sesión puedes identificar el motivo oculto detrás de cualquier acción o declaración de un PNJ."},
+      {icon:"⚔️",title:'"Creo en algo"',desc:"En un mundo de cálculos, actuar por convicción genuina es lo más inesperado — y lo más poderoso.",featName:"El Movimiento Imposible",featDesc:"Cuando actúas por convicción genuina, una vez por encuentro puedes realizar una acción que nadie esperaba porque nadie creía que lo harías."},
+      {icon:"🔍",title:'"Calculo para proteger lo que creo"',desc:"No es frialdad — es disciplina al servicio de algo que importa.",featName:"La Sombra que Anticipa",featDesc:"Tu capacidad de leer patrones políticos te permite anticipar traiciones, emboscadas o conspiraciones antes de que ocurran."}
+    ]
+  },
+  {
+    id:"pueblos", color:"#7d6608", icon:"🏕️",
+    name:"Los Pueblos sin Techo", sub:"La Confederación — Arminio El Dorado",
+    declaration:'"Sin trono. Sin templo. Sin cadenas. Libres antes que cualquier imperio existiera. Libres cuando todos hayan caído."',
+    news:[
+      {kw:"Arminio El Dorado",def:"Rey de un reinado de montaña destruido por Cherán. Escapó al norte. Ahora convoca a las tribus."},{t:" resistió lo imposible en "},{kw:"Tol Varen",def:"Fortaleza pre-Rompimiento del Velo en las montañas. La roca que permanece. El lugar donde nació la Confederación."},{t:". "},{kw:"La Orden Escarlata",def:"Los caballeros errantes que llegaron a Tol Varen, multiplicaron la fuerza de Arminio y partieron en silencio."},{t:" llegó cuando nadie más llegó — y se fue sin despedirse. Las montañas del norte despiertan. "},{kw:"La Confederación",def:"La coalición de pueblos libres bajo Arminio El Dorado. Resistencia organizada contra la expansión de Cherán."},{t:" crece."}
+    ],
+    history:["Los Pueblos sin Techo son todo lo que existe entre los imperios. Tribus nómadas, confederaciones, pueblos costeros, civilizaciones que eligieron la libertad sobre la institución.","Lo que los une ahora es Arminio El Dorado — un rey que perdió todo y eligió resistir. Desde las montañas convoca a pueblos que nunca antes cooperaron.","La Confederación no tiene agenda cósmica. Solo sabe que Cherán avanza y que la única respuesta es unirse."],
+    govt:"Confederación emergente. Arminio El Dorado lidera con la legitimidad de Tol Varen. Cada pueblo mantiene su autonomía — es una alianza militar, no un imperio.",
+    figures:[{name:"Arminio El Dorado",desc:"Como Vercingetórix — aristócrata operando con recursos limitados contra una máquina imperial. Las montañas lo siguen."},{name:"Ser Gianni du Mont",desc:"El Primero de la Mesa que llegó a Tol Varen. Multiplicó la fuerza de Arminio y se fue sin despedirse."},{name:"Tol Varen",desc:"La fortaleza pre-Rompimiento donde nació la Confederación. La roca que permaneció cuando todo lo demás caía."},{name:"Los Pueblos de las Montañas",desc:"Decenas de tribus con su propia historia y razón para resistir. Cada una diferente. Todas mirando al mismo horizonte."}],
+    geo:"La Confederación crece pero Cherán es vastamente más poderosa. La victoria en Tol Varen demostró que es posible resistir. Los imperios observan a Arminio — algunos con esperanza, otros calculando cómo usarlo.",
+    identity:"No tienes el peso de ninguna institución. No debes lealtad a ningún título. El mundo que construyeron los imperios no fue construido para ti — o decidiste que no era suficiente. Eres libre. Esa libertad tiene un precio que muy pocos están dispuestos a pagar.",
+    question:"¿De qué huyes o hacia qué caminas?",
+    options:[
+      {icon:"🔍",title:'"Huyo de algo"',desc:"Sobreviviste en los márgenes. Conoces cada ruta de escape que otros no ven.",featName:"Los Caminos que Nadie Ve",featDesc:"Tu experiencia en los márgenes te permite encontrar rutas de escape, recursos escondidos o refugios en cualquier entorno."},
+      {icon:"⚔️",title:'"Camino hacia algo"',desc:"Tienes un objetivo. Eso te hace más peligroso que cualquier soldado entrenado.",featName:"La Línea Recta",featDesc:"Cuando peleas por un objetivo claro y personal, una vez por encuentro puedes ignorar cualquier obstáculo entre tú y ese objetivo."},
+      {icon:"🗣️",title:'"Solo camino"',desc:"No perteneces a ningún bando — y todos lo saben. Eso te abre puertas que nadie más puede abrir.",featName:"El que No Tiene Dueño",featDesc:"Tu naturaleza libre hace que cualquier facción te vea como uno de los suyos — puedes moverte entre grupos hostiles sin levantar sospechas."}
+    ]
+  }
+];
+
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+let currentFaction = null;
+let selectedOption = null;
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+function initBoard() {
+  const board = document.getElementById('bulletin-board');
+  board.innerHTML = factions.map((f, i) => `
+    <div class="faction-card" style="--faction-color:${f.color}"
+         onclick="selectFaction(${i})" tabindex="0" role="button" aria-label="Ver ${f.name}"
+         onkeydown="if(event.key==='Enter'||event.key===' ')selectFaction(${i})">
+      <span class="card-icon">${f.icon}</span>
+      <div class="card-faction-name">${f.name}</div>
+      <div class="card-faction-sub">${f.sub}</div>
+      <div class="card-declaration">${f.declaration}</div>
+      <div class="card-cta">Explorar →</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('screen-' + n);
+  target.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  if (n === 2 && currentFaction) renderNews();
+  if (n === 3 && currentFaction) renderDetail();
+  if (n === 4 && currentFaction) renderQuestion();
+  if (n === 5 && currentFaction && selectedOption !== null) renderResult();
+}
+
+function selectFaction(idx) {
+  currentFaction = factions[idx];
+  selectedOption = null;
+  goTo(2);
+}
+
+// ═══════════════════════════════════
+// KEYWORDS
+// ═══════════════════════════════════
+function buildNewsHTML(parts, color) {
+  return parts.map(p => {
+    if (p.t) return p.t;
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      return `<span class="keyword" style="color:var(--text);border-bottom-color:${color};font-weight:700" onclick="openKwModal('${p.kw.replace(/'/g,"\\'")}','${p.def.replace(/'/g,"\\'")}')">${p.kw}</span>`;
+    } else {
+      return `<span class="keyword" style="color:var(--text);border-bottom-color:${color};font-weight:700">${p.kw}<span class="kw-tip">${p.def}</span></span>`;
+    }
+  }).join('');
+}
+
+function openKwModal(term, def) {
+  document.getElementById('kw-term').textContent = term;
+  document.getElementById('kw-def').textContent = def;
+  document.getElementById('kw-overlay').classList.add('open');
+}
+
+function closeKwModal(e) {
+  if (e.target === document.getElementById('kw-overlay')) {
+    document.getElementById('kw-overlay').classList.remove('open');
+  }
+}
+
+// ═══════════════════════════════════
+// RENDER SCREENS
+// ═══════════════════════════════════
+function renderNews() {
+  const f = currentFaction;
+  document.getElementById('news-icon').textContent = f.icon;
+  document.getElementById('news-name').textContent = f.name;
+  document.getElementById('news-name').style.color = f.color;
+  document.getElementById('news-sub').textContent = f.sub;
+  document.getElementById('news-text').innerHTML = buildNewsHTML(f.news, f.color);
+}
+
+function renderDetail() {
+  const f = currentFaction;
+  document.getElementById('detail-icon').textContent = f.icon;
+  document.getElementById('detail-name').textContent = f.name;
+  document.getElementById('detail-name').style.color = f.color;
+  document.getElementById('detail-sub').textContent = f.sub;
+  document.getElementById('detail-history').innerHTML = f.history.map(p =>
+    `<p class="history-text">${p}</p>`).join('');
+  document.getElementById('detail-govt').textContent = f.govt;
+  document.getElementById('detail-figures').innerHTML = f.figures.map(fig => `
+    <div class="figure-card">
+      <div class="figure-name" style="color:${f.color}">${fig.name}</div>
+      <div class="figure-desc">${fig.desc}</div>
+    </div>`).join('');
+  document.getElementById('detail-geo').textContent = f.geo;
+  const btn = document.getElementById('choose-btn');
+  btn.style.background = f.color;
+}
+
+function renderQuestion() {
+  const f = currentFaction;
+  selectedOption = null;
+  document.getElementById('q-identity').textContent = f.identity;
+  document.getElementById('q-question').textContent = f.question;
+  const confirmBtn = document.getElementById('confirm-btn');
+  confirmBtn.disabled = true;
+  confirmBtn.style.background = '';
+
+  document.getElementById('q-options').innerHTML = f.options.map((opt, i) => `
+    <div class="option-card" id="opt-${i}"
+         onclick="selectOption(${i})"
+         tabindex="0" role="button"
+         onkeydown="if(event.key==='Enter'||event.key===' ')selectOption(${i})"
+         style="--faction-color:${f.color}">
+      <span class="option-icon">${opt.icon}</span>
+      <div class="option-title">${opt.title}</div>
+      <div class="option-desc">${opt.desc}</div>
+      <div class="feat-preview">
+        <div class="feat-badge">⚜ Feat</div>
+        <div class="feat-name-sm">${opt.featName}</div>
+        <div class="feat-desc-sm">${opt.featDesc}</div>
+      </div>
+    </div>`).join('');
+}
+
+function selectOption(idx) {
+  selectedOption = idx;
+  document.querySelectorAll('.option-card').forEach((c, i) =>
+    c.classList.toggle('selected', i === idx));
+  const confirmBtn = document.getElementById('confirm-btn');
+  confirmBtn.disabled = false;
+  confirmBtn.style.background = currentFaction.color;
+  // Scroll to confirm button on mobile
+  setTimeout(() => confirmBtn.scrollIntoView({behavior:'smooth', block:'nearest'}), 100);
+}
+
+function renderResult() {
+  const f = currentFaction;
+  const opt = f.options[selectedOption];
+  const card = document.getElementById('result-card');
+  card.style.setProperty('--faction-result-color', f.color);
+  document.getElementById('r-icon').textContent = f.icon;
+  document.getElementById('r-faction').textContent = f.name;
+  document.getElementById('r-faction').style.color = f.color;
+  document.getElementById('r-option').textContent = opt.title.replace(/"/g,'');
+  document.getElementById('r-feat-name').textContent = opt.featName;
+  document.getElementById('r-feat-desc').textContent = opt.featDesc;
+  document.getElementById('r-identity').textContent = f.identity;
+}
+
+// ═══════════════════════════════════
+// SHARE
+// ═══════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function captureScreenshot() {
+  showToast('Generando imagen...');
+  const card = document.getElementById('result-card');
+  html2canvas(card, { backgroundColor:'#ffffff', scale:2, useCORS:true })
+    .then(canvas => {
+      const link = document.createElement('a');
+      link.download = `avelir-${currentFaction.id}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('✓ Imagen guardada');
+    }).catch(() => showToast('Error al generar imagen'));
+}
+
+function printResult() {
+  const f = currentFaction;
+  const opt = f.options[selectedOption];
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Avelir — ${f.name}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Nunito',sans-serif;max-width:580px;margin:3rem auto;padding:2rem;color:#2a1f12;background:#faf6ef}
+    h1{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:${f.color};margin-bottom:.2rem}
+    .sub{color:#8a7a5a;font-style:italic;margin-bottom:1.5rem;font-size:.9rem}
+    .feat-box{border:2px solid ${f.color};border-radius:8px;padding:1.2rem 1.5rem;margin:1.5rem 0;background:#f5e6c0}
+    .feat-label{font-size:.65rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:${f.color};margin-bottom:.4rem}
+    .feat-name{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;margin-bottom:.4rem}
+    .identity{font-family:'Cormorant Garamond',serif;font-style:italic;color:#5a4a30;line-height:1.8;margin-top:1.5rem;padding-left:1rem;border-left:2px solid #c8b896}
+    hr{border:none;border-top:1px solid #e0d5c0;margin:1.5rem 0}
+    .footer{font-size:.75rem;color:#8a7a5a;text-align:center;margin-top:2rem}
+    @media print{body{background:white}}
+  </style></head><body>
+  <h1>${f.icon} ${f.name}</h1>
+  <div class="sub">${opt.title.replace(/"/g,'')}</div>
+  <hr>
+  <div class="feat-box">
+    <div class="feat-label">⚜ Feat de Origen</div>
+    <div class="feat-name">${opt.featName}</div>
+    <p>${opt.featDesc}</p>
+  </div>
+  <div class="identity">${f.identity}</div>
+  <hr>
+  <div class="footer">Epic Quest — Avelir Character Creation</div>
+  </body></html>`);
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+}
+
+function copyText() {
+  const f = currentFaction;
+  const opt = f.options[selectedOption];
+  const text = `${f.icon} EPIC QUEST — AVELIR\nFacción: ${f.name}\nElección: ${opt.title.replace(/"/g,'')}\n\n⚜ FEAT: ${opt.featName}\n${opt.featDesc}\n\n${f.identity}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.classList.add('success');
+    btn.textContent = '✓ Copiado';
+    showToast('✓ Copiado al portapapeles');
+    setTimeout(() => { btn.classList.remove('success'); btn.innerHTML = '📋 Copiar texto'; }, 2000);
+  }).catch(() => showToast('Copia el texto manualmente'));
+}
+
+function restartAll() {
+  currentFaction = null;
+  selectedOption = null;
+  goTo(1);
+}
+
+initBoard();
+</script>
+</body>
+</html>
