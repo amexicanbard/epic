@@ -160,8 +160,17 @@ body[data-view="board"] .board{display:block}
 
 /* --------------------------------------------------------------- rail */
 .rail{border-right:1px solid var(--rule);overflow-y:auto;background:var(--surface);padding-bottom:40px}
-.railgroup{border-bottom:1px solid var(--rule-soft)}
-.railgroup > .lbl{display:block;padding:16px 18px 7px}
+.jump{position:sticky;top:0;z-index:6;background:var(--surface);
+  border-bottom:1px solid var(--rule);padding:9px 12px;display:flex;gap:5px;flex-wrap:wrap}
+.jchip{border:1px solid var(--rule);background:var(--raised);border-radius:20px;
+  padding:3px 10px;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--ink-soft);
+  display:inline-flex;gap:6px;align-items:baseline}
+.jchip:hover{border-color:var(--ink-faint);color:var(--ink)}
+.jchip .c{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-faint);
+  font-variant-numeric:tabular-nums}
+.railgroup{border-bottom:1px solid var(--rule-soft);scroll-margin-top:46px}
+.railgroup > .lbl{display:block;padding:14px 18px 7px;position:sticky;top:42px;z-index:4;
+  background:var(--surface);border-bottom:1px solid var(--rule-soft)}
 .item{
   display:grid;grid-template-columns:9px 1fr auto;gap:10px;align-items:baseline;
   width:100%;text-align:left;border:0;background:none;cursor:pointer;
@@ -462,11 +471,16 @@ function render(md){
 
 /* ------------------------------------------------------------ rail */
 function buildRail(){
-  var html = "";
+  var html = '<div class="jump">';
+  GROUPS.forEach(function(g){
+    var n = DOCS.filter(function(d){ return d.grupo === g.k; }).length;
+    if(n) html += '<button class="jchip" data-jg="'+g.k+'">'+g.n+'<span class="c">'+n+"</span></button>";
+  });
+  html += "</div>";
   GROUPS.forEach(function(g){
     var list = DOCS.filter(function(d){ return d.grupo === g.k; });
     if(!list.length) return;
-    html += '<div class="railgroup"><span class="lbl">'+g.n+"</span>";
+    html += '<div class="railgroup" id="g-'+g.k+'"><span class="lbl">'+g.n+"</span>";
     list.forEach(function(d){
       html += '<button class="item" data-id="'+d.id+'" data-st="'+rec(d.id).status+'">'
            +  '<span class="dot"></span><span class="t">'+esc(d.titulo)+"</span>"
@@ -477,6 +491,12 @@ function buildRail(){
   html += '<p class="emptyfind" id="noHits" hidden>Sin resultados.</p>';
   $("#rail").innerHTML = html;
   $("#rail").addEventListener("click", function(e){
+    var j = e.target.closest("[data-jg]");
+    if(j){
+      var g = document.getElementById("g-"+j.dataset.jg);
+      if(g) g.scrollIntoView({block:"start", behavior:"smooth"});
+      return;
+    }
     var b = e.target.closest(".item"); if(b) open(b.dataset.id);
   });
 }
