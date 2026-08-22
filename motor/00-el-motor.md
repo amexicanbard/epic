@@ -236,6 +236,25 @@ Cualquier editor de texto hace buscar-y-reemplazar; también sirve el buscador d
 | `{{P_DISFRAZ}}` | Qué ponerse |
 | `{{P_ACCESORIO}}` | El objeto que hace el personaje |
 
+### Marcadores del guion cerrado
+*Solo en la hoja de personaje. Son los que convierten la hoja en algo que se lee sin improvisar.*
+
+| Marcador | Qué va ahí |
+|---|---|
+| `{{P_COARTADA_GUION}}` | Su coartada verdadera, redactada para leerse en voz alta |
+| `{{P_HUECO_GUION}}` | Cómo explica su hueco, palabra por palabra |
+| `{{P_MENTIRA_GUION}}` | Su coartada **falsa**, redactada para leerse en voz alta |
+| `{{P_MENTIRA_HUECO}}` | Cómo explica su hueco cuando miente |
+| `{{P_SECRETO_GUION}}` | Cómo confiesa su secreto en el Acto 3 |
+| `{{P_R_RELACION}}` `{{P_R_GANANCIA}}` `{{P_R_VIO}}` `{{P_R_SOSPECHA}}` `{{P_R_EVASIVA}}` | Las respuestas del banco |
+| `{{P_DEFENSA_1}}` a `{{P_DEFENSA_3}}` | Las tres respuestas para cuando lo acusen |
+| `{{P_PLAN_A1}}` a `{{P_PLAN_A3}}` | El plan del culpable, acto por acto |
+| `{{P_PREGUNTA_A1_1}}` … `{{P_PREGUNTA_A3_3}}` | Sus nueve preguntas, tres por acto |
+
+> 💡 **Ejemplo lleno:** las catorce hojas de
+> [`juegos/la-herencia-de-la-abuela/personajes/`](../juegos/la-herencia-de-la-abuela/personajes/)
+> son esta plantilla ya rellenada. Cuando dudes de qué va en un marcador, ábrelas.
+
 ---
 
 ## 10. Qué NO cambiar

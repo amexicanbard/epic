@@ -51,6 +51,15 @@ personaje. Si al final buscas `{{` y no aparece nada, terminaste.
 
 ---
 
+## Ejemplo ya rellenado
+
+Si en algún momento no sabes qué va en un marcador, abre el juego
+[**La Herencia de la Abuela**](../../juegos/la-herencia-de-la-abuela/): está hecho con estas mismas
+plantillas, sin excepciones. Las catorce hojas de `personajes/` son
+`plantilla-hoja-personaje.md` rellenada catorce veces.
+
+---
+
 ## Verificación rápida antes de imprimir
 
 - ☐ Busqué `{{` en todos los archivos y no queda ninguno
