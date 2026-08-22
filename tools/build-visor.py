@@ -9,7 +9,7 @@ haga falta: las notas de revisión guardadas en el Artifact NO viven aquí, vive
 en la versión publicada, así que al regenerar hay que volver a pegarlas si se
 quieren conservar (el script acepta --state notas.json para reinyectarlas).
 """
-import json, base64, re, sys, os
+import json, base64, re, sys, os, shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -554,7 +554,7 @@ function buildBoard(){
       html += '<div class="brow" data-st="'+r.status+'"><div class="stripe"></div>'
            +  '<div class="who"><b>'+esc(d.titulo)+'</b><div class="p">'+esc(d.id)+"</div></div>"
            +  '<div class="nota">'+(r.nota ? esc(r.nota) : "—")+"</div>"
-           +  '<button class="go" data-go="'+d.id+'">Abrir</button></div>";
+           +  '<button class="go" data-go="'+d.id+'">Abrir</button></div>';
     });
     html += "</div>";
   });
@@ -665,6 +665,7 @@ $("#copyBtn").onclick = function(){
 
 /* ------------------------------------------------------------ publish */
 function pageSource(){
+  var P = function(n){ return "__" + n + "__"; };   // no literal: el build lo sustituiria
   var b64 = document.getElementById("shell").textContent.trim();
   var bin = atob(b64), bytes = new Uint8Array(bin.length);
   for(var i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
@@ -672,9 +673,9 @@ function pageSource(){
   STATE.updated = new Date().toISOString().slice(0,16).replace("T", " ");
   return "<!doctype html>\n<html lang=\"es\"><head><meta charset=\"utf-8\">"
        + "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head><body>\n"
-       + shell.replace("__SHELL_B64__", function(){ return b64; })
-              .replace("__CORPUS__", function(){ return document.getElementById("corpus").textContent; })
-              .replace("__STATE__", function(){ return JSON.stringify(STATE); })
+       + shell.replace(P("SHELL_B64"), function(){ return b64; })
+              .replace(P("CORPUS"), function(){ return document.getElementById("corpus").textContent; })
+              .replace(P("STATE"), function(){ return JSON.stringify(STATE); })
        + "\n</body></html>";
 }
 $("#saveBtn").onclick = function(){
@@ -739,6 +740,41 @@ if(STATE.updated) { $("#saveNote").textContent = "Revisión de " + STATE.updated
 </script>
 """
 
+# --------------------------------------------------------------- verificacion
+
+def verificar(html):
+    """Aborta el build si el script emitido no es JS valido, o si la pagina no
+    se reproduce a si misma. Un error de sintaxis descarta el <script> entero
+    y la pagina se publica muda: hay que atraparlo aqui, no en el navegador."""
+    import subprocess, tempfile
+
+    # 1. el script de la app tiene que ser JS valido
+    abre = html.rindex("<script>")
+    cierra = html.index("</script>", abre)
+    app = html[abre + len("<script>"):cierra]
+    if shutil.which("node"):
+        with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as fh:
+            fh.write(app); tmp = fh.name
+        r = subprocess.run(["node", "--check", tmp], capture_output=True, text=True)
+        os.unlink(tmp)
+        if r.returncode != 0:
+            raise SystemExit("BUILD ABORTADO — error de sintaxis en el script:\n" + r.stderr)
+        print("   sintaxis del script: ok (%d bytes)" % len(app))
+    else:
+        print("   aviso: node no disponible, sin verificar sintaxis")
+
+    # 2. la pagina tiene que reproducirse a si misma byte a byte
+    b64 = re.search(r'<script id="shell" type="text/plain">([A-Za-z0-9+/=\s]+)</script>', html).group(1).strip()
+    shell = base64.b64decode(b64).decode("utf-8")
+    corpus = re.search(r'<script id="corpus" type="application/json">(.*?)</script>', html, re.S).group(1)
+    estado = re.search(r'<script id="state" type="application/json">(.*?)</script>', html, re.S).group(1)
+    rehecho = (shell.replace("__SHELL_B64__", b64)
+                    .replace("__CORPUS__", corpus)
+                    .replace("__STATE__", estado))
+    if rehecho != html:
+        raise SystemExit("BUILD ABORTADO — la pagina no se reproduce a si misma; guardar la corromperia")
+    print("   auto-reproduccion: exacta")
+
 # ------------------------------------------------------------------- ensamble
 
 def main():
@@ -752,6 +788,13 @@ def main():
         print("estado reinyectado desde", sp)
 
     shell = SHELL.replace("__GROUPS__", json.dumps(grupos, ensure_ascii=False))
+    for marca in ("__SHELL_B64__", "__CORPUS__", "__STATE__", "__GROUPS__"):
+        n = shell.count(marca)
+        esperado = 0 if marca == "__GROUPS__" else 1
+        if n != esperado:
+            raise SystemExit("BUILD ABORTADO — %s aparece %d veces, se esperaba %d. "
+                             "Un marcador repetido se sustituye tambien dentro del "
+                             "codigo y rompe el script." % (marca, n, esperado))
     b64 = base64.b64encode(shell.encode("utf-8")).decode("ascii")
 
     def j(o):
@@ -762,6 +805,7 @@ def main():
             .replace("__CORPUS__", j(docs))
             .replace("__STATE__", j(estado)))
 
+    verificar(html)
     OUT.write_text(html, encoding="utf-8")
     kb = len(html.encode("utf-8")) / 1024
     print("visor.html  %d documentos  %.0f KB" % (len(docs), kb))
